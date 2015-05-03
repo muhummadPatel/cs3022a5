@@ -70,6 +70,46 @@ namespace ptlmuh006{
 
                 return *this;
             }
+
+            void read(std::string filename){
+                std::ifstream infile(filename, std::ios::in | std::ios::binary);
+
+                if(!infile){
+                    std::cout << "Error opening file!" << std::endl;
+                    std::exit(1);
+                }
+
+                //get length of infile
+                infile.seekg(0, infile.end);
+                int infileLength = infile.tellg();
+                infile.seekg(0, infile.beg);
+                std::cout << "length of " << filename << ": " << infileLength << std::endl;
+
+                int numSamples = infileLength / (sizeof(S) * numChannels);
+                std::cout << "numSamples: " << numSamples << std::endl;
+
+                data.resize(numSamples);
+                for(int i = 0; i < numSamples; i++){
+                    char buff[sizeof(S)];
+                    infile.read(buff, sizeof(S));
+                    data[i] = *(S *)(buff);
+                }
+
+//                for(int i = 0 ; i < 10; i++){
+//                    std::cout << data[numSamples - (i+1)] << std::endl;
+//                }
+
+                infile.close();
+            }
+
+            void save(std::string filename){
+                std::ofstream outfile(filename, std::ios::out | std::ios::binary);
+
+                outfile.write((char*)(&(data[0])), sizeof(S) * data.size());
+
+                outfile.close();
+            }
+
     };
 
 }
