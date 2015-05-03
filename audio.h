@@ -66,7 +66,7 @@ namespace ptlmuh006{
                 //move over the data
                 data = other.data;
 
-                other.data = nullptr;
+                other.data.resize(0);
 
                 return *this;
             }
@@ -111,7 +111,7 @@ namespace ptlmuh006{
             }
 
             //concatenation operator
-            Audio operator|(const Audio rhs) const{
+            Audio operator|(const Audio& rhs) const{
                 //TODO: check that the files are compatible before catting them
 
                 Audio cat = *this;
@@ -120,6 +120,20 @@ namespace ptlmuh006{
                 }
 
                 return cat;
+            }
+
+            //volume factor operator
+            Audio operator*(const std::pair<float, float> factor) const{
+                //TODO: check the factors given are in range [0.0f, 1.0f]
+
+                float monoFact = factor.first;
+
+                Audio factored = *this;
+                for(int i = 0; i < data.size(); i++){
+                    factored.data[i] *= monoFact;
+                }
+
+                return factored;
             }
     };
 

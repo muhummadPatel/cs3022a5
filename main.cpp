@@ -18,4 +18,8 @@ int main()
 
     Audio<int16_t> c = a | b;
     c.save("aCATb.raw");
+
+    std::pair<float, float> factor(0.5f, 0.0f);
+    Audio<int16_t> f = a * factor;
+    f.save("aFACThalf.raw");
 }
