@@ -110,6 +110,17 @@ namespace ptlmuh006{
                 outfile.close();
             }
 
+            //concatenation operator
+            Audio operator|(const Audio rhs) const{
+                //TODO: check that the files are compatible before catting them
+
+                Audio cat = *this;
+                for(int i = 0; i < rhs.data.size(); i++){
+                    cat.data.push_back(rhs.data[i]);
+                }
+
+                return cat;
+            }
     };
 
 }
