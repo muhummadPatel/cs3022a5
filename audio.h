@@ -15,6 +15,71 @@ namespace ptlmuh006{
             int sampleRate, bitCount, numChannels;
             std::string filename;
             std::vector<S> data;
+        
+        public:
+            //nested iterator class
+            class iterator{
+                //friend the audio class to allow for access to private members
+                friend class Audio;
+                
+                private:
+                    S* ptr;
+                    iterator(S* p): ptr(p) {} //constructor (only called by Audio::begin())
+                    
+                public:
+                    //copy construct is public
+                    iterator( const iterator & rhs) : ptr(rhs.ptr) {}
+                    
+                    //copy assignment
+                    iterator& operator=(const iterator& rhs){
+                        ptr = rhs.ptr;
+                    }
+                    
+                    //move assignment
+                    iterator& operator=(iterator&& rhs){
+                        ptr = rhs.ptr;
+                        rhs.ptr = nullptr;
+                    }
+                    
+                    //dereference
+                    S& operator*(){
+                        return *ptr;
+                    }
+                    
+                    //prefix ++
+                    const iterator& operator++(){
+                        ptr += 1;
+                        return *this;
+                    }
+                    
+                    //prefix --
+                    const iterator& operator--(){
+                        ptr -= 1;
+                        return this;
+                    }
+                    
+                    //equality
+                    bool operator==(const iterator& rhs){
+                        return (ptr == rhs.ptr);
+                    }
+                    
+                    //inequality
+                    bool operator!=(const iterator& rhs){
+                        return (ptr != rhs.ptr);
+                    }
+            };
+            
+            //iterator to start of sample data
+            iterator begin() const{
+                S* first = (S*)&(data[0]);
+                return iterator(first);
+            }
+            
+            //one past the last valid position
+            iterator end() const{
+                S* onePastLast = (S*)&(data[data.size()]);
+                return iterator(onePastLast);
+            }
 
         public:
             //TODO: add parameterised constructors too

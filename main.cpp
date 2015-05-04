@@ -31,5 +31,9 @@ int main()
     
     std::pair<int, int> range(44100, 44100*5);
     Audio<int16_t> y = a ^ range;
-    y.save("aCUT2secs.raw");
+    y.save("aCUT4secs.raw");
+    
+//    for(auto it = y.begin(); it != y.end(); ++it){
+//        std::cout << *it << std::endl;
+//    }
 }
