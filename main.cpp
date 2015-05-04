@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-#include <audio.h>
+#include "audio.h"
 
 using namespace ptlmuh006;
 
@@ -22,4 +22,10 @@ int main()
     std::pair<float, float> factor(0.5f, 0.0f);
     Audio<int16_t> f = a * factor;
     f.save("aFACThalf.raw");
+    
+    Audio<int16_t> x(44100, 16, 1);
+    x.read("siren40sec_44100_signed_16bit_mono.raw");
+    
+    Audio<int16_t> p = a + x;
+    p.save("aPLUSx.raw");
 }

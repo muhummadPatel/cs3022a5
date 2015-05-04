@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -134,6 +135,25 @@ namespace ptlmuh006{
                 }
 
                 return factored;
+            }
+            
+            //per sample add operator
+            Audio operator+(const Audio& rhs) const{
+                Audio sum = *this;
+                Audio other = rhs;
+                if(this->data.size() < rhs.data.size()){
+                    sum = rhs;
+                    other = *this;
+                }
+                
+                for(int i = 0; i < other.data.size(); i++){
+                    sum.data[i] += other.data[i];
+                    if(sum.data[i] > std::numeric_limits<S>::max()){
+                        sum.data[i] = std::numeric_limits<S>::max();
+                    } 
+                }
+                
+                return sum;
             }
     };
 
