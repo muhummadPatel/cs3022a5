@@ -1,6 +1,7 @@
 #ifndef AUDIO
 #define AUDIO
 
+#include <algorithm>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
@@ -222,7 +223,7 @@ namespace ptlmuh006{
             }
             
             //cut operator
-            Audio operator^(const std::pair<int, int> range){
+            Audio operator^(const std::pair<int, int> range) const{
                 Audio cut = *this;
                 
                 auto rangeStart = cut.data.begin() + (range.first - 1);
@@ -230,6 +231,14 @@ namespace ptlmuh006{
                 cut.data.erase(rangeStart, rangeEnd);
                 
                 return cut;
+            }
+            
+            Audio reverse() const{
+                Audio rev = *this;
+                
+                std::reverse(rev.begin(), rev.end());
+                
+                return rev;
             }
     };
 
