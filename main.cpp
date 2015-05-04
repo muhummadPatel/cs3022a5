@@ -28,4 +28,8 @@ int main()
     
     Audio<int16_t> p = a + x;
     p.save("aPLUSx.raw");
+    
+    std::pair<int, int> range(44100, 44100*5);
+    Audio<int16_t> y = a ^ range;
+    y.save("aCUT2secs.raw");
 }

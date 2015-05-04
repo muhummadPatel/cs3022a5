@@ -155,6 +155,17 @@ namespace ptlmuh006{
                 
                 return sum;
             }
+            
+            //cut operator
+            Audio operator^(const std::pair<int, int> range){
+                Audio cut = *this;
+                
+                auto rangeStart = cut.data.begin() + (range.first - 1);
+                auto rangeEnd = cut.data.begin() + (range.second - 1);
+                cut.data.erase(rangeStart, rangeEnd);
+                
+                return cut;
+            }
     };
 
 }
