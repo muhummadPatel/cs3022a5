@@ -182,7 +182,7 @@ namespace ptlmuh006{
                 //TODO: check that the files are compatible before catting them
 
                 Audio cat = *this;
-                for(int i = 0; i < rhs.data.size(); i++){
+                for(std::size_t i = 0; i < rhs.data.size(); i++){
                     cat.data.push_back(rhs.data[i]);
                 }
 
@@ -196,7 +196,7 @@ namespace ptlmuh006{
                 float monoFact = factor.first;
 
                 Audio factored = *this;
-                for(int i = 0; i < data.size(); i++){
+                for(std::size_t i = 0; i < data.size(); i++){
                     factored.data[i] *= monoFact;
                 }
 
@@ -212,11 +212,13 @@ namespace ptlmuh006{
                     other = *this;
                 }
                 
-                for(int i = 0; i < other.data.size(); i++){
+                for(std::size_t i = 0; i < other.data.size(); i++){
                     sum.data[i] += other.data[i];
                     if(sum.data[i] > std::numeric_limits<S>::max()){
                         sum.data[i] = std::numeric_limits<S>::max();
-                    } 
+                    }else if(sum.data[i] < std::numeric_limits<S>::min()){
+                        sum.data[i] = std::numeric_limits<S>::min();
+                    }
                 }
                 
                 return sum;
