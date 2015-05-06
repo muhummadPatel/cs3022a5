@@ -297,7 +297,67 @@ namespace ptlmuh006{
                 std::transform(data.begin(), data.end(), std::back_inserter(norm.data), normFunctor(requiredRMS.first, currentRMS));
             }
     };
+    
+    template<typename S> class Audio<std::pair<S, S>>{
+        private:
+            int sampleRate, bitCount, numChannels;
+            std::string filename;
+            std::vector<std::pair<S, S>> data;
+        
+        public:
+            //TODO: add parameterised constructors too
+            //defualt constructor
+            Audio(int r = 44100, int b = 16, int c = 2): sampleRate(r), bitCount(b), numChannels(c){}
+            
+            void read(std::string filename){
+                std::ifstream infile(filename, std::ios::in | std::ios::binary);
 
+                if(!infile){
+                    std::cout << "Error opening file!" << std::endl;
+                    std::exit(1);
+                }
+
+                //get length of infile
+                infile.seekg(0, infile.end);
+                int infileLength = infile.tellg();
+                infile.seekg(0, infile.beg);
+                std::cout << "length of " << filename << ": " << infileLength << std::endl;
+
+                int numSamples = infileLength / (sizeof(S) * numChannels);
+                std::cout << "numSamples: " << numSamples << std::endl;
+
+                data.resize(numSamples);
+                for(int i = 0; i < numSamples; i++){
+                    char lBuff[sizeof(S)];
+                    infile.read(lBuff, sizeof(S));
+                    data[i].first = *(S *)(lBuff);
+                    
+                    char rBuff[sizeof(S)];
+                    infile.read(rBuff, sizeof(S));
+                    data[i].second = *(S *)(rBuff);
+                }
+
+//                for(int i = 0 ; i < 10; i++){
+//                    std::cout << data[numSamples - (i+1)] << std::endl;
+//                }
+
+                infile.close();
+            }
+
+            void save(std::string filename){
+                std::ofstream outfile(filename, std::ios::out | std::ios::binary);
+
+                //outfile.write((char*)(&(data[0].first)), sizeof(S));
+                int index = 0;
+                std::for_each(data.begin(), data.end(), [&outfile, &index](std::pair<S, S> sample){ 
+                    outfile.write((char*)(&(sample.first)), sizeof(S));
+                    outfile.write((char*)(&(sample.second)), sizeof(S));
+                    index++;
+                });
+
+                outfile.close();
+            }
+    };
 }
 #endif // AUDIO
 
