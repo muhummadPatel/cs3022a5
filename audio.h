@@ -255,6 +255,17 @@ namespace ptlmuh006{
 
                 return sum;
             }
+
+            //compute RMS transformation
+            float computeRMS(){
+                float sumOfSq = 0;
+                int numSamples = 0;
+
+                std::function<S> rmsLambda = [&numSamples](float sumOfSq, S x){ sumOfSq += x * x; numSamples++;};
+                std::accumulate(data.begin(), data.end(), sumOfSq, rmsLambda);
+
+                return std::sqrt(sumOfSq / numSamples);
+            }
     };
 
 }
