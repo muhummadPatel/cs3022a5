@@ -235,12 +235,25 @@ namespace ptlmuh006{
                 return cut;
             }
             
+            //reverse transformation
             Audio reverse() const{
                 Audio rev = *this;
                 
                 std::reverse(rev.begin(), rev.end());
                 
                 return rev;
+            }
+
+            //ranged add transformation
+            Audio rangedAdd(std::pair<int, int> range1, Audio aud2, std::pair<int, int> range2) const{
+                //TODO: check sample reanges given have same length
+                //TODO: try to change this to use std::copy
+
+                Audio aud1 = *this ^ range1;
+                aud2 = aud2 ^ range2;
+                Audio sum = aud1 + aud2;
+
+                return sum;
             }
     };
 
