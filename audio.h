@@ -2,10 +2,12 @@
 #define AUDIO
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <numeric>
 #include <string>
 #include <vector>
 
@@ -81,6 +83,25 @@ namespace ptlmuh006{
                 S* onePastLast = (S*)&(data[data.size()]);
                 return iterator(onePastLast);
             }
+
+        public:
+            //nested Functor
+            class normFunctor{
+                public:
+                    float normFact;
+                    normFunctor(float desiredRMS, float currentRMS): normFact(desiredRMS / currentRMS){}
+                    S operator()(S inputAmp){
+                        float outAmp = inputAmp * normFact;
+
+                        if(outAmp > std::numeric_limits<S>::max()){
+                            outAmp = std::numeric_limits<S>::max();
+                        }else if(outAmp < std::numeric_limits<S>::min()){
+                            outAmp = std::numeric_limits<S>::min();
+                        }
+
+                        return outAmp;
+                    }
+            };
 
         public:
             //TODO: add parameterised constructors too
@@ -265,6 +286,15 @@ namespace ptlmuh006{
                 std::accumulate(data.begin(), data.end(), sumOfSq, rmsLambda);
 
                 return std::sqrt(sumOfSq / numSamples);
+            }
+
+            //normalisation transformation
+            Audio normalized(std::pair<float, float> requiredRMS) const{
+                Audio norm = *this;
+                float currentRMS = norm.computeRMS();
+
+                norm.data.resize(0);
+                std::transform(data.begin(), data.end(), std::back_inserter(norm.data), normFunctor(requiredRMS.first, currentRMS));
             }
     };
 
