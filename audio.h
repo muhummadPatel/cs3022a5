@@ -85,7 +85,7 @@ namespace ptlmuh006{
         public:
             //TODO: add parameterised constructors too
             //defualt constructor
-            Audio(int r, int b, int c): sampleRate(r), bitCount(b), numChannels(c){}
+            Audio(int r = 44100, int b = 16, int c = 1): sampleRate(r), bitCount(b), numChannels(c){}
 
             //copy constructor
             Audio(const Audio& other){
