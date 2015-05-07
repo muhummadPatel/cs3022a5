@@ -106,7 +106,17 @@ namespace ptlmuh006{
         public:
             //TODO: add parameterised constructors too
             //defualt constructor
-            Audio(int r = 44100, int b = 16, int c = 1): sampleRate(r), bitCount(b), numChannels(c){}
+            Audio(int r = 44100, int b = 16, int c = 1): 
+                sampleRate(r),
+                bitCount(b),
+                numChannels(c){}
+            
+            //constructor to be used for testing purposes
+            Audio(int r, int b, int c, std::vector<S> d):
+                sampleRate(r),
+                bitCount(b),
+                numChannels(c),
+                data(d){}
 
             //copy constructor
             Audio(const Audio& other){
@@ -125,7 +135,7 @@ namespace ptlmuh006{
                 numChannels = other.numChannels;
 
                 //TODO: make this a deep copy
-                data = other.data;
+                data = std::move(other.data);
 
                 other.data.resize(0);
             }
@@ -152,12 +162,17 @@ namespace ptlmuh006{
                 numChannels = other.numChannels;
 
                 //move over the data
-                data = other.data;
+                data = std::move(other.data);
 
                 other.data.resize(0);
 
                 return *this;
             }
+            
+            int getSampleRate(){ return sampleRate; }
+            int getBitCount(){ return bitCount; }
+            int getNumChannels(){ return numChannels; }
+            std::vector<S> getData(){ return data; }
 
             void read(std::string filename){
                 std::ifstream infile(filename, std::ios::in | std::ios::binary);
@@ -199,10 +214,10 @@ namespace ptlmuh006{
             }
 
             //concatenation operator
-            Audio operator|(const Audio& rhs) const{
+            Audio<S> operator|(const Audio& rhs) const{
                 //TODO: check that the files are compatible before catting them
 
-                Audio cat = *this;
+                Audio<S> cat = *this;
                 for(std::size_t i = 0; i < rhs.data.size(); i++){
                     cat.data.push_back(rhs.data[i]);
                 }
@@ -234,12 +249,16 @@ namespace ptlmuh006{
                 }
                 
                 for(std::size_t i = 0; i < other.data.size(); i++){
-                    sum.data[i] += other.data[i];
-                    if(sum.data[i] > std::numeric_limits<S>::max()){
-                        sum.data[i] = std::numeric_limits<S>::max();
-                    }else if(sum.data[i] < std::numeric_limits<S>::min()){
-                        sum.data[i] = std::numeric_limits<S>::min();
+                    
+                    
+                    double testSum = sum.data[i] + other.data[i];
+                    if(testSum > std::numeric_limits<S>::max()){
+                        testSum = std::numeric_limits<S>::max();
+                    }else if (testSum < std::numeric_limits<S>::min()){
+                        testSum = std::numeric_limits<S>::min();
                     }
+                    
+                    sum.data[i] = (S)testSum;
                 }
                 
                 return sum;
