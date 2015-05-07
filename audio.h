@@ -269,7 +269,6 @@ namespace ptlmuh006{
                 Audio cut = *this;
                 
                 auto rangeStart = cut.data.begin() + (range.first - 1);
-                auto rangeEnd = cut.data.begin() + (range.second - 1);
                 auto rangeEnd = cut.data.begin() + (range.second);
                 cut.data.erase(rangeStart, rangeEnd);
                 
@@ -280,7 +279,7 @@ namespace ptlmuh006{
             Audio reverse() const{
                 Audio rev = *this;
                 
-                std::reverse(rev.begin(), rev.end());
+                std::reverse(rev.data.begin(), rev.data.end());
                 
                 return rev;
             }
