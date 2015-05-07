@@ -270,6 +270,7 @@ namespace ptlmuh006{
                 
                 auto rangeStart = cut.data.begin() + (range.first - 1);
                 auto rangeEnd = cut.data.begin() + (range.second - 1);
+                auto rangeEnd = cut.data.begin() + (range.second);
                 cut.data.erase(rangeStart, rangeEnd);
                 
                 return cut;
