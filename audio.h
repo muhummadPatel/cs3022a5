@@ -285,12 +285,23 @@ namespace ptlmuh006{
             }
 
             //ranged add transformation
-            Audio rangedAdd(std::pair<int, int> range1, Audio aud2, std::pair<int, int> range2) const{
+            static Audio rangedAdd(Audio aud1, const std::pair<int, int> range1, Audio aud2, const std::pair<int, int> range2){
                 //TODO: check sample reanges given have same length
                 //TODO: try to change this to use std::copy
 
-                Audio aud1 = *this ^ range1;
-                aud2 = aud2 ^ range2;
+                std::vector<S> buffer;
+
+                auto startIt = aud1.data.begin() + (range1.first - 1);
+                auto endIt = aud1.data.begin() + range1.second;
+                std::copy(startIt, endIt, std::back_inserter(buffer));
+                aud1.data = std::move(buffer);
+
+                startIt = aud2.data.begin() + (range2.first - 1);
+                endIt = aud2.data.begin() + range2.second;
+                std::copy(startIt, endIt, std::back_inserter(buffer));
+                aud2.data = std::move(buffer);
+                buffer.resize(0);
+
                 Audio sum = aud1 + aud2;
 
                 return sum;
