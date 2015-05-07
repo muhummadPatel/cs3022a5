@@ -88,10 +88,10 @@ namespace ptlmuh006{
             //nested Functor
             class normFunctor{
                 public:
-                    float normFact;
+                    double normFact;
                     normFunctor(float desiredRMS, float currentRMS): normFact(desiredRMS / currentRMS){}
                     S operator()(S inputAmp){
-                        float outAmp = inputAmp * normFact;
+                        double outAmp = inputAmp * normFact;
 
                         if(outAmp > std::numeric_limits<S>::max()){
                             outAmp = std::numeric_limits<S>::max();
@@ -99,7 +99,7 @@ namespace ptlmuh006{
                             outAmp = std::numeric_limits<S>::min();
                         }
 
-                        return outAmp;
+                        return (S)outAmp;
                     }
             };
 
@@ -324,6 +324,8 @@ namespace ptlmuh006{
 
                 norm.data.resize(0);
                 std::transform(data.begin(), data.end(), std::back_inserter(norm.data), normFunctor(requiredRMS.first, currentRMS));
+
+                return norm;
             }
     };
     
