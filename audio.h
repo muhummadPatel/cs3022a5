@@ -312,8 +312,7 @@ namespace ptlmuh006{
                 float sumOfSq = 0;
                 int numSamples = 0;
 
-                std::function<S> rmsLambda = [&numSamples](float sumOfSq, S x){ sumOfSq += x * x; numSamples++;};
-                std::accumulate(data.begin(), data.end(), sumOfSq, rmsLambda);
+                sumOfSq = std::accumulate(data.begin(), data.end(), sumOfSq, [&numSamples](float sumOfSq, S x){ numSamples++; return sumOfSq + (x * x);});
 
                 return std::sqrt(sumOfSq / numSamples);
             }
