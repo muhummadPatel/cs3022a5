@@ -57,6 +57,18 @@ TEST_CASE("Test Mono Operator Overloads", ""){
         REQUIRE( sum.getData().size() == expected.size() );
         REQUIRE( sum.getData() == expected );
     }
+
+    SECTION("Test cut operator a^f"){
+        //GIVEN: some audio object a
+        //WHEN: we apply the cut operator with (2, 5)
+        Audio<int16_t> cut = a ^ std::pair<int, int>(2, 5);
+
+        //THEN: the result should be a copy of a without the samples in the specified range (inclusive)
+        std::vector<int16_t> expected = {-1, -3, 10, -10};
+        REQUIRE( cut.getData().size() == expected.size() );
+        REQUIRE( cut.getData() == expected );
+    }
+}
 }
 
 TEST_CASE("Test Mono Move/Copy Semantics", ""){
