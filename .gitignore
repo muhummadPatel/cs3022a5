@@ -6,3 +6,6 @@ deployment.pri
 build
 *.raw
 samp
+testsamp.dSYM
+testsamp
+.qmake.stash
