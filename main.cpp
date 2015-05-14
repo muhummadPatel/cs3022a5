@@ -87,6 +87,18 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         rev.save(outFilename);
         
         return 0;
+    }else if(std::string(argv[pos]) == "-rms"){ 
+        if(argc < (pos+1)+1) return 1;
+        
+        Audio<T> aud(argv[pos+1], sampleRate, bitCount, noChannels);
+        std::pair<float, float> rms = aud.computeRMS();
+        if(noChannels == 1){
+            std::cout << "RMS: " << rms.first << std::endl;
+        }else{
+            std::cout << "RMS: " << rms.first << ":" << rms.second << std::endl;
+        }
+        
+        return 0;
     }else{
         return 1;
     }
