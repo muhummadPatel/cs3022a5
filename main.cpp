@@ -4,8 +4,6 @@
 
 #include "audio.h"
 
-//TODO: FIX RANGED ADD TO USE SECONDS
-
 void printUsage(){
     using namespace std;
     
@@ -39,6 +37,8 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         Audio<T> sum = aud1 + aud2;
         sum.save(outFilename);
         
+        std::cout << "Files successfully added and saved to " << outFilename << std::endl;
+        
         return 0;
     }else if(std::string(argv[pos]) == "-cut"){
         if(argc < (pos+3)+1) return 1;
@@ -49,16 +49,24 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         Audio<T> cut = original ^ std::pair<int, int>(r1, r2);
         cut.save(outFilename);
         
+        std::cout << "File successfully cut and saved to " << outFilename << std::endl;
+        
         return 0;
     }else if(std::string(argv[pos]) == "-radd"){
         if(argc < (pos+6)+1) return 1;
         
         Audio<T> aud1(argv[pos+5], sampleRate, bitCount, noChannels);
         Audio<T> aud2(argv[pos+6], sampleRate, bitCount, noChannels);
-        std::pair<int, int> r1(std::stoi(argv[pos+1]), std::stoi(argv[pos+2]));
-        std::pair<int, int> r2(std::stoi(argv[pos+3]), std::stoi(argv[pos+4]));
+        int r1Start = (int)(std::stof(argv[pos+1]) * bitCount);
+        int r1End = (int)(std::stof(argv[pos+2]) * bitCount);
+        int r2Start = (int)(std::stof(argv[pos+3]) * bitCount);
+        int r2End = (int)(std::stof(argv[pos+4]) * bitCount);
+        std::pair<int, int> r1(r1Start, r1End);
+        std::pair<int, int> r2(r2Start, r2End);
         Audio<T> radd = Audio<T>::rangedAdd(aud1, r1, aud2, r2);
         radd.save(outFilename);
+        
+        std::cout << "File successfully added over range and saved to " << outFilename << std::endl;
         
         return 0;
     }else if(std::string(argv[pos]) == "-cat"){
@@ -69,6 +77,8 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         Audio<T> cat = aud1 | aud2;
         cat.save(outFilename);
         
+        std::cout << "Files successfully concatenated and saved to " << outFilename << std::endl;
+        
         return 0;
     }else if(std::string(argv[pos]) == "-v"){
         if(argc < (pos+3)+1) return 1;
@@ -78,6 +88,8 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         Audio<T> factored = aud * fact;
         factored.save(outFilename);
         
+        std::cout << "File successfully volume factored and saved to " << outFilename << std::endl;
+        
         return 0;
     }else if(std::string(argv[pos]) == "-rev"){
         if(argc < (pos+1)+1) return 1;
@@ -85,6 +97,8 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         Audio<T> aud(argv[pos+1], sampleRate, bitCount, noChannels);
         Audio<T> rev = aud.reverse();
         rev.save(outFilename);
+        
+        std::cout << "File successfully reversed and stored to " << outFilename << std::endl;
         
         return 0;
     }else if(std::string(argv[pos]) == "-rms"){ 
@@ -95,7 +109,8 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         if(noChannels == 1){
             std::cout << "RMS: " << rms.first << std::endl;
         }else{
-            std::cout << "RMS: " << rms.first << ":" << rms.second << std::endl;
+            std::cout << "Left channel RMS: " << rms.first << std::endl;
+            std::cout << "Right channel RMS: " << rms.second << std::endl;
         }
         
         return 0;
@@ -106,6 +121,8 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         std::pair<float, float> reqRMS(std::stof(argv[pos+1]), std::stof(argv[pos+2]));
         Audio<T> norm = aud.normalized(reqRMS);
         norm.save(outFilename);
+        
+        std::cout << "File successfully normalized and stored to " << outFilename << std::endl;
         
         return 0;
     }else{
@@ -157,10 +174,10 @@ int main(int argc, char* argv[]){
         }
         
         if(response != 0){
-            std::cout << "ERRRORRR" << std::endl;
+            std::cout << "Invalid usage." << std::endl;
+            printUsage();
+            return 1;
         }
-        
-        std::cout << sampleRate << " " << bitCount << " " << noChannels << std::endl;
     }
     
     return 0;
