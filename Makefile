@@ -2,7 +2,7 @@ CPP=g++
 CPPFLAGS=-std=c++11 -g
 EXE_NAME=samp
 
-$(EXE_NAME):
+$(EXE_NAME): main.cpp audio.h
 	$(CPP) -o $(EXE_NAME) main.cpp $(CPPFLAGS)
 
 test:
