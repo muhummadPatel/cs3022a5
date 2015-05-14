@@ -79,6 +79,14 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         factored.save(outFilename);
         
         return 0;
+    }else if(std::string(argv[pos]) == "-rev"){
+        if(argc < (pos+1)+1) return 1;
+        
+        Audio<T> aud(argv[pos+1], sampleRate, bitCount, noChannels);
+        Audio<T> rev = aud.reverse();
+        rev.save(outFilename);
+        
+        return 0;
     }else{
         return 1;
     }
