@@ -60,7 +60,7 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         Audio<T> sum = aud1 + aud2;
         sum.save(outFilename);
         
-        std::cout << "Files successfully added and saved to " << outFilename << std::endl;
+        std::cout << "Files successfully added and saved." << std::endl;
         
         return 0;
     }else if(std::string(argv[pos]) == "-cut"){
@@ -72,7 +72,7 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         Audio<T> cut = original ^ std::pair<int, int>(r1, r2);
         cut.save(outFilename);
         
-        std::cout << "File successfully cut and saved to " << outFilename << std::endl;
+        std::cout << "File successfully cut and saved." << std::endl;
         
         return 0;
     }else if(std::string(argv[pos]) == "-radd"){
@@ -80,13 +80,15 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         
         //open the 2 audio files being range added
         Audio<T> aud1(argv[pos+5], sampleRate, bitCount, noChannels);
+        std::cout << "s1: " << aud1.getData().size() << std::endl;
         Audio<T> aud2(argv[pos+6], sampleRate, bitCount, noChannels);
+        std::cout << "s2: " << aud2.getData().size() << std::endl;
         
         //construct the ranges over which they will be added
-        int r1Start = (int)(std::stof(argv[pos+1]) * bitCount);
-        int r1End = (int)(std::stof(argv[pos+2]) * bitCount);
-        int r2Start = (int)(std::stof(argv[pos+3]) * bitCount);
-        int r2End = (int)(std::stof(argv[pos+4]) * bitCount);
+        int r1Start = (int)(std::stof(argv[pos+1]) * sampleRate);
+        int r1End = (int)(std::stof(argv[pos+2]) * sampleRate);
+        int r2Start = (int)(std::stof(argv[pos+3]) * sampleRate);
+        int r2End = (int)(std::stof(argv[pos+4]) * sampleRate);
         std::pair<int, int> r1(r1Start, r1End);
         std::pair<int, int> r2(r2Start, r2End);
         
@@ -94,7 +96,7 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         Audio<T> radd = Audio<T>::rangedAdd(aud1, r1, aud2, r2);
         radd.save(outFilename);
         
-        std::cout << "File successfully added over range and saved to " << outFilename << std::endl;
+        std::cout << "File successfully added over range and saved." << std::endl;
         
         return 0;
     }else if(std::string(argv[pos]) == "-cat"){
@@ -108,7 +110,7 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         Audio<T> cat = aud1 | aud2;
         cat.save(outFilename);
         
-        std::cout << "Files successfully concatenated and saved to " << outFilename << std::endl;
+        std::cout << "Files successfully concatenated and saved." << std::endl;
         
         return 0;
     }else if(std::string(argv[pos]) == "-v"){
@@ -124,7 +126,7 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         Audio<T> factored = aud * fact;
         factored.save(outFilename);
         
-        std::cout << "File successfully volume factored and saved to " << outFilename << std::endl;
+        std::cout << "File successfully volume factored and saved." << std::endl;
         
         return 0;
     }else if(std::string(argv[pos]) == "-rev"){
@@ -134,7 +136,7 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         Audio<T> rev = aud.reverse();
         rev.save(outFilename);
         
-        std::cout << "File successfully reversed and stored to " << outFilename << std::endl;
+        std::cout << "File successfully reversed and stored." << std::endl;
         
         return 0;
     }else if(std::string(argv[pos]) == "-rms"){ 
@@ -163,7 +165,7 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         Audio<T> norm = aud.normalized(reqRMS);
         norm.save(outFilename);
         
-        std::cout << "File successfully normalized and stored to " << outFilename << std::endl;
+        std::cout << "File successfully normalized and stored." << std::endl;
         
         return 0;
     }else{
@@ -195,7 +197,7 @@ int main(int argc, char* argv[]){
         }
         
         //get the output filename if it was provided
-        std::string outFilename = "out.raw";
+        std::string outFilename = "out";
         if(std::string(argv[7]) == "-o"){
             outFilename = std::string(argv[8]);
         }
