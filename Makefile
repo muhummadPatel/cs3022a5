@@ -10,4 +10,4 @@ test:
 	./testsamp
 
 clean:
-	rm -f *.o $(EXE_NAME)
+	rm -f *.o $(EXE_NAME) testsamp
