@@ -7,7 +7,7 @@ $(EXE_NAME): main.cpp audio.h
 
 test:
 	$(CPP) -o testsamp test.cpp $(CPPFLAGS)
-        #./testsamp
+	./testsamp
 
 clean:
 	rm -f *.o $(EXE_NAME)
