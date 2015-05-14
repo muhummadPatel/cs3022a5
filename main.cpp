@@ -99,6 +99,15 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         }
         
         return 0;
+    }else if(std::string(argv[pos]) == "-norm"){
+        if(argc < (pos+3)+1) return 1;
+        
+        Audio<T> aud(argv[pos+3], sampleRate, bitCount, noChannels);
+        std::pair<float, float> reqRMS(std::stof(argv[pos+1]), std::stof(argv[pos+2]));
+        Audio<T> norm = aud.normalized(reqRMS);
+        norm.save(outFilename);
+        
+        return 0;
     }else{
         return 1;
     }
