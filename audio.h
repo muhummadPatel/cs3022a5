@@ -47,6 +47,13 @@ namespace ptlmuh006{
                 bitCount(b),
                 numChannels(c){}
             
+            Audio(std::string infilename, int r = 44100, int b = 16, int c = 2):
+                sampleRate(r),
+                bitCount(b),
+                numChannels(c){
+                    read(infilename);
+                }
+            
             //constructor to be used for testing purposes
             Audio(int r, int b, int c, std::vector<S> d):
                 sampleRate(r),
@@ -305,6 +312,13 @@ namespace ptlmuh006{
                 bitCount(b),
                 numChannels(c){}
             
+            Audio(std::string infilename, int r = 44100, int b = 16, int c = 2): 
+                sampleRate(r),
+                bitCount(b),
+                numChannels(c){
+                    read(infilename);
+                }
+            
             //constructor to be used for testing purposes
             Audio(int r, int b, int c, std::vector<std::pair<S, S>> d):
                 sampleRate(r),
@@ -415,6 +429,18 @@ namespace ptlmuh006{
             int getNumChannels(){ return numChannels; }
             std::vector<std::pair<S, S>> getData(){ return data; }
             
+            //concatenation operator
+            Audio operator|(const Audio& rhs) const{
+                //TODO: check that the files are compatible before catting them
+
+                Audio cat = *this;
+                for(std::size_t i = 0; i < rhs.data.size(); i++){
+                    cat.data.push_back(rhs.data[i]);
+                }
+
+                return cat;
+            }
+            
             //volume factor operator
             Audio operator*(const std::pair<float, float> factor) const{
                 //TODO: check the factors given are in range [0.0f, 1.0f]                
@@ -485,12 +511,13 @@ namespace ptlmuh006{
                 //TODO: check sample reanges given have same length
                 //TODO: try to change this to use std::copy
 
-                std::vector<S> buffer;
+                std::vector<std::pair<S, S>> buffer;
 
                 auto startIt = aud1.data.begin() + (range1.first - 1);
                 auto endIt = aud1.data.begin() + range1.second;
                 std::copy(startIt, endIt, std::back_inserter(buffer));
                 aud1.data = std::move(buffer);
+                buffer.resize(0);
 
                 startIt = aud2.data.begin() + (range2.first - 1);
                 endIt = aud2.data.begin() + range2.second;
@@ -534,10 +561,10 @@ namespace ptlmuh006{
             //normalisation transformation
             Audio normalized(std::pair<float, float> requiredRMS) const{
                 Audio norm = *this;
-                float currentRMS = norm.computeRMS();
+                std::pair<float, float> currentRMS = norm.computeRMS();
 
                 norm.data.resize(0);
-                std::transform(data.begin(), data.end(), std::back_inserter(norm.data), normFunctor(requiredRMS.first, currentRMS));
+                std::transform(data.begin(), data.end(), std::back_inserter(norm.data), normFunctor(requiredRMS, currentRMS));
 
                 return norm;
             }
