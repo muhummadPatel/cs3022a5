@@ -32,7 +32,7 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
     std::cout << "pos" << pos << std::endl;
     
     if(std::string(argv[pos]) == "-add"){
-        if(argc != (pos+2)+1) return 1;
+        if(argc < (pos+2)+1) return 1;
         
         Audio<T> aud1(argv[pos+1], sampleRate, bitCount, noChannels);
         Audio<T> aud2(argv[pos+2], sampleRate, bitCount, noChannels);
@@ -41,7 +41,15 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         
         return 0;
     }else if(std::string(argv[pos]) == "-cut"){
-        return 1;
+        if(argc < (pos+3)+1) return 1;
+        
+        Audio<T> original(argv[pos+3], sampleRate, bitCount, noChannels);
+        int r1 = std::stoi(argv[pos+1]);
+        int r2 = std::stoi(argv[pos+2]);
+        Audio<T> cut = original ^ std::pair<int, int>(r1, r2);
+        cut.save(outFilename);
+        
+        return 0;
     }
 }
 
