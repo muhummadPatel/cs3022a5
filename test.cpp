@@ -239,3 +239,230 @@ TEST_CASE("Test Stereo Move/Copy Semantics", ""){
         REQUIRE( newAud.getData() == samples );
     }
 }
+
+TEST_CASE("Test Stereo Operator Overloads", ""){
+    
+    int sampleRate = 44100,
+        bitCount = 16,
+        channels = 2;
+    std::vector<std::pair<int16_t, int16_t>> samplesA = {
+        std::pair<int16_t, int16_t>(1, -1),
+        std::pair<int16_t, int16_t>(2, -2),
+        std::pair<int16_t, int16_t>(3, -3),
+        std::pair<int16_t, int16_t>(4, -4),
+        std::pair<int16_t, int16_t>(5, -5)
+    };
+    
+    Audio<std::pair<int16_t, int16_t>> a(sampleRate, bitCount, channels, samplesA);
+    
+    SECTION("Test concatenate operator a|b"){
+        //GIVEN: some audio objects a and b
+        std::vector<std::pair<int16_t, int16_t>> samplesB = {
+            std::pair<int16_t, int16_t>(6, -1),
+            std::pair<int16_t, int16_t>(7, -2),
+            std::pair<int16_t, int16_t>(8, -3),
+            std::pair<int16_t, int16_t>(9, -4),
+            std::pair<int16_t, int16_t>(10, -5)
+        };
+        Audio<std::pair<int16_t, int16_t>> b(sampleRate, bitCount, channels, samplesB);
+        
+        //WHEN: we concatenate them using the concatenation operator
+        Audio<std::pair<int16_t, int16_t>> concatenated = a | b;
+        
+        //THEN: the result should be the two files back to back
+        std::vector<std::pair<int16_t, int16_t>> expected = {
+            std::pair<int16_t, int16_t>(1, -1),
+            std::pair<int16_t, int16_t>(2, -2),
+            std::pair<int16_t, int16_t>(3, -3),
+            std::pair<int16_t, int16_t>(4, -4),
+            std::pair<int16_t, int16_t>(5, -5),
+            std::pair<int16_t, int16_t>(6, -1),
+            std::pair<int16_t, int16_t>(7, -2),
+            std::pair<int16_t, int16_t>(8, -3),
+            std::pair<int16_t, int16_t>(9, -4),
+            std::pair<int16_t, int16_t>(10, -5)
+        };
+        REQUIRE( concatenated.getData().size() == expected.size() );
+        REQUIRE( concatenated.getData() == expected );
+    }
+    
+    SECTION("Test volume factor operator a*f"){
+        //GIVEN: some audio object a        
+        //WHEN: we apply the volume factor operator with 0.5 and 2.0
+        Audio<std::pair<int16_t, int16_t>> factored = a * std::pair<float, float>(0.5f, 2.0f);
+        
+        //THEN: the result should have all samples halved and clamped
+        std::vector<std::pair<int16_t, int16_t>> expected = {
+            std::pair<int16_t, int16_t>(0, -2),
+            std::pair<int16_t, int16_t>(1, -4),
+            std::pair<int16_t, int16_t>(1, -6),
+            std::pair<int16_t, int16_t>(2, -8),
+            std::pair<int16_t, int16_t>(2, -10)
+        };
+        REQUIRE( factored.getData().size() == expected.size() );
+        REQUIRE( factored.getData() == expected );
+    }
+    
+    SECTION("Test addition operator a+b"){
+        //GIVEN: some audio objects a and b
+        std::vector<std::pair<int16_t, int16_t>> samplesB = {
+            std::pair<int16_t, int16_t>(6, -1),
+            std::pair<int16_t, int16_t>(7, -2),
+            std::pair<int16_t, int16_t>(8, -3),
+            std::pair<int16_t, int16_t>(9, -4),
+            std::pair<int16_t, int16_t>(std::numeric_limits<int16_t>::max(), std::numeric_limits<int16_t>::min())
+        };
+        Audio<std::pair<int16_t, int16_t>> b(sampleRate, bitCount, channels, samplesB);
+        
+        //WHEN: we add a and b
+        Audio<std::pair<int16_t, int16_t>> sum = a + b;
+        
+        //THEN: the result should have all samples added together and clamped
+        std::vector<std::pair<int16_t, int16_t>> expected = {
+            std::pair<int16_t, int16_t>(7, -2),
+            std::pair<int16_t, int16_t>(9, -4),
+            std::pair<int16_t, int16_t>(11, -6),
+            std::pair<int16_t, int16_t>(13, -8),
+            std::pair<int16_t, int16_t>(std::numeric_limits<int16_t>::max(), std::numeric_limits<int16_t>::min())
+        };
+        
+        REQUIRE( sum.getData().size() == expected.size() );
+        REQUIRE( sum.getData() == expected );
+    }
+    
+    SECTION("Test cut operator a^f"){
+        //GIVEN: some audio object a
+        //WHEN: we apply the cut operator with (2, 4)
+        Audio<std::pair<int16_t, int16_t>> cut = a ^ std::pair<int, int>(2, 4);
+
+        //THEN: the result should be a copy of a without the samples in the specified range (inclusive)
+        std::vector<std::pair<int16_t, int16_t>> expected = {
+            std::pair<int16_t, int16_t>(1, -1),
+            std::pair<int16_t, int16_t>(5, -5)
+        };
+        
+        REQUIRE( cut.getData().size() == expected.size() );
+        REQUIRE( cut.getData() == expected );
+    }
+}
+
+TEST_CASE("Test Stereo Audio Transformations", ""){
+
+    int sampleRate = 44100,
+        bitCount = 16,
+        channels = 2;
+        
+    std::vector<std::pair<int16_t, int16_t>> samplesA = {
+        std::pair<int16_t, int16_t>(1, -1),
+        std::pair<int16_t, int16_t>(2, -2),
+        std::pair<int16_t, int16_t>(3, -3),
+        std::pair<int16_t, int16_t>(4, -4),
+        std::pair<int16_t, int16_t>(5, -5)
+    };
+    
+    Audio<std::pair<int16_t, int16_t>> a(sampleRate, bitCount, channels, samplesA);
+    
+    SECTION("Test reverse transformation"){
+        //GIVEN: some audio file a
+        //WHEN: we apply the reverse transformation to a
+        Audio<std::pair<int16_t, int16_t>> rev = a.reverse();
+
+        //THEN: we should get a new audio object with all the samples reversed
+        std::vector<std::pair<int16_t, int16_t>> expected = {
+            std::pair<int16_t, int16_t>(5, -5),
+            std::pair<int16_t, int16_t>(4, -4),
+            std::pair<int16_t, int16_t>(3, -3),
+            std::pair<int16_t, int16_t>(2, -2),
+            std::pair<int16_t, int16_t>(1, -1)
+        };
+    
+        REQUIRE( rev.getData().size() == expected.size() );
+        REQUIRE( rev.getData() == expected );
+    }
+    
+    SECTION("Test ranged add transformation"){
+        //GIVEN: some audio files a and b
+        std::vector<std::pair<int16_t, int16_t>> samplesB = {
+            std::pair<int16_t, int16_t>(6, -1),
+            std::pair<int16_t, int16_t>(7, -2),
+            std::pair<int16_t, int16_t>(std::numeric_limits<int16_t>::max(), std::numeric_limits<int16_t>::min()),
+            std::pair<int16_t, int16_t>(8, -3),
+            std::pair<int16_t, int16_t>(9, -4)
+        };
+        Audio<std::pair<int16_t, int16_t>> b(sampleRate, bitCount, channels, samplesB);
+
+        //WHEN: we apply the ranged add transformation to a and b
+        Audio<std::pair<int16_t, int16_t>> radd = Audio<std::pair<int16_t, int16_t>>::rangedAdd(a, std::pair<int, int>(1, 4), b, std::pair<int, int>(2, 5));
+
+        //THEN: we should get a new audio object with all the samples in the given ranges added
+        std::vector<std::pair<int16_t, int16_t>> expected = {
+            std::pair<int16_t, int16_t>(8, -3),
+            std::pair<int16_t, int16_t>(std::numeric_limits<int16_t>::max(), std::numeric_limits<int16_t>::min()),
+            std::pair<int16_t, int16_t>(11, -6),
+            std::pair<int16_t, int16_t>(13, -8)
+        };
+        
+        REQUIRE( radd.getData().size() == expected.size() );
+        REQUIRE( a.getData().size() == samplesA.size() );
+        REQUIRE( b.getData().size() == samplesB.size() );
+    }
+    
+    SECTION("Test compute rms transformation"){
+        //GIVEN: some audio object a
+        //WHEN: we compute the rms for that audio object
+        std::pair<float, float> rms = a.computeRMS();
+
+        //THEN: we should get the correct RMS value and the object should not have changed
+        std::pair<float, float> expected(3.3166247904, 3.3166247904);
+        REQUIRE( rms.first == Approx(expected.first) );
+        REQUIRE( rms.second == Approx(expected.second) );
+        REQUIRE( a.getData() == samplesA);
+    }
+    
+    SECTION("Test sound normalization transformation"){
+        //GIVEN: some audio object b
+        std::vector<std::pair<int16_t, int16_t>> samplesB = {
+            std::pair<int16_t, int16_t>(1, 2),
+            std::pair<int16_t, int16_t>(1, 2),
+            std::pair<int16_t, int16_t>(1, 2),
+            std::pair<int16_t, int16_t>(1, 2),
+            std::pair<int16_t, int16_t>(1, 2)
+        };
+        Audio<std::pair<int16_t, int16_t>> b(sampleRate, bitCount, channels, samplesB);
+        
+        //WHEN: we normalize to a specific rms value
+        Audio<std::pair<int16_t, int16_t>> norm = b.normalized(std::pair<float, float>(20.0f, 40.0f));
+
+        //THEN: we should get a new audio object with the channels normalized to the specified level
+        REQUIRE( norm.computeRMS().first == Approx(20).epsilon(1.0) );
+        REQUIRE( norm.computeRMS().second == Approx(40).epsilon(1.0) );
+        REQUIRE( a.getData() == samplesA);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
