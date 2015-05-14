@@ -49,7 +49,6 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
     //where the options start changes based on whether or not a filename was 
     //specified.
     int pos = (std::string(argv[7]) == "-o")? 9 : 7;
-    std::cout << "pos" << pos << std::endl;
     
     //check which option is being requested and handle it appropriately
     if(std::string(argv[pos]) == "-add"){
