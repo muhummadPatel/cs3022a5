@@ -26,6 +26,9 @@ To clean up, type 'make clean'.
 To compile and run the unit tests, type 'make test'.
 
 ===Example runs:===
+_Note:	before running any of these, please compile, and ensure that the
+		referenced files are present in the working directory.
+
 ./samp -r 44100 -b 16 -c 2 -add frogs18sec_44100_signed_16bit_stereo.raw beez18sec_44100_signed_16bit_stereo.raw 
 ./samp -r 44100 -b 16 -c 2 -cut 44100 220500 frogs18sec_44100_signed_16bit_stereo.raw
 ./samp -r 44100 -b 16 -c 2 -radd 1 4 2 5 frogs18sec_44100_signed_16bit_stereo.raw beez18sec_44100_signed_16bit_stereo.raw 
