@@ -18,78 +18,14 @@ namespace ptlmuh006{
             int sampleRate, bitCount, numChannels;
             std::string filename;
             std::vector<S> data;
-        
-        public:
-            //nested iterator class
-            class iterator{
-                //friend the audio class to allow for access to private members
-                friend class Audio;
-                
-                private:
-                    S* ptr;
-                    iterator(S* p): ptr(p) {} //constructor (only called by Audio::begin())
-                    
-                public:
-                    //copy construct is public
-                    iterator( const iterator & rhs) : ptr(rhs.ptr) {}
-                    
-                    //copy assignment
-                    iterator& operator=(const iterator& rhs){
-                        ptr = rhs.ptr;
-                    }
-                    
-                    //move assignment
-                    iterator& operator=(iterator&& rhs){
-                        ptr = rhs.ptr;
-                        rhs.ptr = nullptr;
-                    }
-                    
-                    //dereference
-                    S& operator*(){
-                        return *ptr;
-                    }
-                    
-                    //prefix ++
-                    const iterator& operator++(){
-                        ptr += 1;
-                        return *this;
-                    }
-                    
-                    //prefix --
-                    const iterator& operator--(){
-                        ptr -= 1;
-                        return this;
-                    }
-                    
-                    //equality
-                    bool operator==(const iterator& rhs){
-                        return (ptr == rhs.ptr);
-                    }
-                    
-                    //inequality
-                    bool operator!=(const iterator& rhs){
-                        return (ptr != rhs.ptr);
-                    }
-            };
-            
-            //iterator to start of sample data
-            iterator begin() const{
-                S* first = (S*)&(data[0]);
-                return iterator(first);
-            }
-            
-            //one past the last valid position
-            iterator end() const{
-                S* onePastLast = (S*)&(data[data.size()]);
-                return iterator(onePastLast);
-            }
 
-        public:
+        private:
             //nested Functor
             class normFunctor{
                 public:
                     double normFact;
                     normFunctor(float desiredRMS, float currentRMS): normFact(desiredRMS / currentRMS){}
+                    
                     S operator()(S inputAmp){
                         double outAmp = inputAmp * normFact;
 
@@ -228,7 +164,6 @@ namespace ptlmuh006{
             //volume factor operator
             Audio operator*(const std::pair<float, float> factor) const{
                 //TODO: check the factors given are in range [0.0f, 1.0f]
-
                 float monoFact = factor.first;
 
                 Audio factored = *this;
@@ -329,11 +264,38 @@ namespace ptlmuh006{
             }
     };
     
-    template<typename S> class Audio<std::pair<S, S>>{
+    template<typename S> class Audio<std::pair<S, S> >{
         private:
             int sampleRate, bitCount, numChannels;
             std::string filename;
             std::vector<std::pair<S, S>> data;
+        
+        private:
+            //nested Functor
+            class normFunctor{
+                public:
+                    std::pair<double, double> normFact;
+                    normFunctor(std::pair<float, float> desiredRMS, std::pair<float, float> currentRMS): 
+                        normFact(std::pair<float, float>(desiredRMS.first / currentRMS.first, desiredRMS.second / currentRMS.second)){}
+                        
+                    std::pair<S, S> operator()(std::pair<S, S> inputAmp){
+                        double outAmpL = inputAmp.first * normFact.first;
+                        if(outAmpL > std::numeric_limits<S>::max()){
+                            outAmpL = std::numeric_limits<S>::max();
+                        }else if(outAmpL < std::numeric_limits<S>::min()){
+                            outAmpL = std::numeric_limits<S>::min();
+                        }
+                        
+                        double outAmpR = inputAmp.second * normFact.second;
+                        if(outAmpR > std::numeric_limits<S>::max()){
+                            outAmpR = std::numeric_limits<S>::max();
+                        }else if(outAmpR < std::numeric_limits<S>::min()){
+                            outAmpR = std::numeric_limits<S>::min();
+                        }
+                        
+                        return std::pair<S, S>((S)outAmpL, (S)outAmpR);
+                    }
+            };
         
         public:
             //TODO: add parameterised constructors too
@@ -368,10 +330,6 @@ namespace ptlmuh006{
                     data[i].second = *(S *)(rBuff);
                 }
 
-//                for(int i = 0 ; i < 10; i++){
-//                    std::cout << data[numSamples - (i+1)] << std::endl;
-//                }
-
                 infile.close();
             }
 
@@ -387,6 +345,133 @@ namespace ptlmuh006{
                 });
 
                 outfile.close();
+            }
+            
+            //volume factor operator
+            Audio operator*(const std::pair<float, float> factor) const{
+                //TODO: check the factors given are in range [0.0f, 1.0f]                
+
+                Audio factored = *this;
+                for(std::size_t i = 0; i < data.size(); i++){
+                    factored.data[i].first *= factor.first;
+                    factored.data[i].second *= factor.second;
+                }
+
+                return factored;
+            }
+            
+            //per sample add operator
+            Audio operator+(const Audio& rhs) const{
+                Audio sum = *this;
+                Audio other = rhs;
+                if(this->data.size() < rhs.data.size()){
+                    sum = rhs;
+                    other = *this;
+                }
+                
+                for(std::size_t i = 0; i < other.data.size(); i++){
+                    
+                    double testSum1 = sum.data[i].first + other.data[i].first;
+                    if(testSum1 > std::numeric_limits<S>::max()){
+                        testSum1 = std::numeric_limits<S>::max();
+                    }else if (testSum1 < std::numeric_limits<S>::min()){
+                        testSum1 = std::numeric_limits<S>::min();
+                    }
+                    sum.data[i].first = (S)testSum1;
+                    
+                    double testSum2 = sum.data[i].second + other.data[i].second;
+                    if(testSum2 > std::numeric_limits<S>::max()){
+                        testSum2 = std::numeric_limits<S>::max();
+                    }else if (testSum2 < std::numeric_limits<S>::min()){
+                        testSum2 = std::numeric_limits<S>::min();
+                    }
+                    sum.data[i].second = (S)testSum2;
+                }
+                
+                return sum;
+            }
+            
+            //TODO: Do cut and add and ranged add need to be here???
+            //cut operator
+            Audio operator^(const std::pair<int, int> range) const{
+                Audio cut = *this;
+                
+                auto rangeStart = cut.data.begin() + (range.first - 1);
+                auto rangeEnd = cut.data.begin() + (range.second);
+                cut.data.erase(rangeStart, rangeEnd);
+                
+                return cut;
+            }
+            
+            //reverse transformation
+            Audio reverse() const{
+                Audio rev = *this;
+                
+                std::reverse(rev.data.begin(), rev.data.end());
+                
+                return rev;
+            }
+
+            //ranged add transformation
+            static Audio rangedAdd(Audio aud1, const std::pair<int, int> range1, Audio aud2, const std::pair<int, int> range2){
+                //TODO: check sample reanges given have same length
+                //TODO: try to change this to use std::copy
+
+                std::vector<S> buffer;
+
+                auto startIt = aud1.data.begin() + (range1.first - 1);
+                auto endIt = aud1.data.begin() + range1.second;
+                std::copy(startIt, endIt, std::back_inserter(buffer));
+                aud1.data = std::move(buffer);
+
+                startIt = aud2.data.begin() + (range2.first - 1);
+                endIt = aud2.data.begin() + range2.second;
+                std::copy(startIt, endIt, std::back_inserter(buffer));
+                aud2.data = std::move(buffer);
+                buffer.resize(0);
+
+                Audio sum = aud1 + aud2;
+
+                return sum;
+            }
+
+            //compute RMS transformation
+            std::pair<float, float> computeRMS(){
+                float sumOfSqL = 0;
+                int numSamples = 0;
+
+                sumOfSqL = std::accumulate(data.begin(), data.end(), sumOfSqL, 
+                    [&numSamples](float sumOfSqL, std::pair<S, S> x){ 
+                        numSamples++;
+                        return sumOfSqL + (x.first * x.first);
+                    }
+                );
+                
+                float sumOfSqR = 0;
+                numSamples = 0;
+
+                sumOfSqR = std::accumulate(data.begin(), data.end(), sumOfSqR, 
+                    [&numSamples](float sumOfSqR, std::pair<S, S> x){ 
+                        numSamples++;
+                        return sumOfSqR + (x.first * x.first);
+                    }
+                );
+                
+                float RMSLeft = std::sqrt(sumOfSqL / numSamples);
+                float RMSRight = std::sqrt(sumOfSqR / numSamples);
+                
+                return std::pair<float, float>(RMSLeft, RMSRight);
+            }
+            
+            //normalisation transformation
+            Audio normalized(std::pair<float, float> requiredRMS) const{
+                Audio norm = *this;
+                float currentRMS = norm.computeRMS();
+
+                norm.data.resize(0);
+                std::transform(data.begin(), data.end(), std::back_inserter(norm.data), normFunctor(requiredRMS.first, currentRMS));
+
+                return norm;
             }
     };
 }
