@@ -117,7 +117,7 @@ TEST_CASE("Test Mono Audio Transformations", ""){
         REQUIRE( a.getData() == samplesA);
     }
 
-    SECTION("Test sound nnormalization transformation"){
+    SECTION("Test sound normalization transformation"){
         //GIVEN: some audio object a
         //WHEN: we normalize to a specific rms value
         std::vector<int16_t> samplesB = {1, 1, 1, 2, 1, 1, 1, 1, 1, 1};
@@ -181,4 +181,61 @@ TEST_CASE("Test Mono Move/Copy Semantics", ""){
         REQUIRE( newAud.getData() == samples );
     }
 
+}
+
+TEST_CASE("Test Stereo Move/Copy Semantics", ""){
+    int sampleRate = 44100,
+        bitCount = 16,
+        channels = 2;
+    std::vector<std::pair<int16_t, int16_t>> samples = {
+        std::pair<int16_t, int16_t>(1, -1),
+        std::pair<int16_t, int16_t>(2, -2),
+        std::pair<int16_t, int16_t>(3, -3),
+        std::pair<int16_t, int16_t>(4, -4),
+        std::pair<int16_t, int16_t>(5, -5)
+    };
+    
+    Audio<std::pair<int16_t, int16_t>> aud(sampleRate, bitCount, channels, samples);
+    
+    SECTION("Test move constructor"){
+        //GIVEN: A constructed object (aud)
+        //WHEN: We create a new object using the move constructor
+        Audio<std::pair<int16_t, int16_t>> newAud = std::move(aud);
+        
+        //THEN: aud should be empty and newAud should be constructed
+        REQUIRE( aud.getData().size() == 0 );
+        REQUIRE( newAud.getData() == samples );
+    }
+    
+    SECTION("Test copy constructor"){
+        //GIVEN: A constructed object (aud)
+        //WHEN: We create a new object using the copy constructor
+        Audio<std::pair<int16_t, int16_t>> newAud = aud;
+        
+        //THEN: aud should be unchanged and newAud should be constructed
+        REQUIRE( aud.getData() == samples );
+        REQUIRE( newAud.getData() == samples );
+    }
+    
+    SECTION("Test copy assignment"){
+        //GIVEN: A constructed object (aud)
+        //WHEN: We copy it into another object
+        Audio<std::pair<int16_t, int16_t>> newAud;
+        newAud = aud;
+        
+        //THEN: aud should be unchanged and newAud should have a copy of aud
+        REQUIRE( aud.getData() == samples );
+        REQUIRE( newAud.getData() == samples );
+    }
+    
+    SECTION("Test move assignment"){
+        //GIVEN: A constructed object (aud)
+        //WHEN: We move it into another object
+        Audio<std::pair<int16_t, int16_t>> newAud;
+        newAud = std::move(aud);
+        
+        //THEN: aud should be empty and newAud should have a copy of aud
+        REQUIRE( aud.getData().size() == 0 );
+        REQUIRE( newAud.getData() == samples );
+    }
 }
