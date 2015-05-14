@@ -53,14 +53,25 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
     }else if(std::string(argv[pos]) == "-radd"){
         if(argc < (pos+6)+1) return 1;
         
-        Audio<T> aud1(argv[pos+5]);
-        Audio<T> aud2(argv[pos+6]);
+        Audio<T> aud1(argv[pos+5], sampleRate, bitCount, noChannels);
+        Audio<T> aud2(argv[pos+6], sampleRate, bitCount, noChannels);
         std::pair<int, int> r1(std::stoi(argv[pos+1]), std::stoi(argv[pos+2]));
         std::pair<int, int> r2(std::stoi(argv[pos+3]), std::stoi(argv[pos+4]));
         Audio<T> radd = Audio<T>::rangedAdd(aud1, r1, aud2, r2);
         radd.save(outFilename);
         
         return 0;
+    }else if(std::string(argv[pos]) == "-cat"){
+        if(argc < (pos+2)+1) return 1;
+        
+        Audio<T> aud1(argv[pos+1], sampleRate, bitCount, noChannels);
+        Audio<T> aud2(argv[pos+2], sampleRate, bitCount, noChannels);
+        Audio<T> cat = aud1 | aud2;
+        cat.save(outFilename);
+        
+        return 0;
+    }else{
+        return 1;
     }
 }
 
