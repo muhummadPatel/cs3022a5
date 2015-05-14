@@ -109,11 +109,12 @@ TEST_CASE("Test Mono Audio Transformations", ""){
     SECTION("Test compute rms transformation"){
         //GIVEN: some audio object a
         //WHEN: we compute the rms for that audio object
-        float rms = a.computeRMS();
+        std::pair<float, float> rms = a.computeRMS();
 
         //THEN: we should get the correct RMS value and the object should not have changed
-        float expected = 5.338539126;
-        REQUIRE( rms == Approx(expected) );
+        std::pair<float, float> expected(5.338539126, 0.0f);
+        REQUIRE( rms.first == Approx(expected.first) );
+        REQUIRE( rms.second == Approx(expected.second) );
         REQUIRE( a.getData() == samplesA);
     }
 
@@ -125,7 +126,7 @@ TEST_CASE("Test Mono Audio Transformations", ""){
         Audio<int16_t> norm = b.normalized(std::pair<float, float>(20.0f, 20.0f));
 
         //THEN: we should get a new audio object with the channel normalized to the specified level
-        REQUIRE( norm.computeRMS() == Approx(20).epsilon(1.0));
+        REQUIRE( norm.computeRMS().first == Approx(20).epsilon(1.0));
         REQUIRE( a.getData() == samplesA);
     }
 }

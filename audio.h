@@ -250,19 +250,20 @@ namespace ptlmuh006{
             }
 
             //compute RMS transformation
-            float computeRMS(){
+            std::pair<float, float> computeRMS(){
                 float sumOfSq = 0;
                 int numSamples = 0;
 
                 sumOfSq = std::accumulate(data.begin(), data.end(), sumOfSq, [&numSamples](float sumOfSq, S x){ numSamples++; return sumOfSq + (x * x);});
 
-                return std::sqrt(sumOfSq / numSamples);
+                std::pair<float, float> rms(std::sqrt(sumOfSq / numSamples), 0.0f);
+                return rms;
             }
 
             //normalisation transformation
             Audio normalized(std::pair<float, float> requiredRMS) const{
                 Audio norm = *this;
-                float currentRMS = norm.computeRMS();
+                float currentRMS = norm.computeRMS().first;
 
                 norm.data.resize(0);
                 std::transform(data.begin(), data.end(), std::back_inserter(norm.data), normFunctor(requiredRMS.first, currentRMS));
