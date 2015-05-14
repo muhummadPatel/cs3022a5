@@ -300,7 +300,70 @@ namespace ptlmuh006{
         public:
             //TODO: add parameterised constructors too
             //defualt constructor
-            Audio(int r = 44100, int b = 16, int c = 2): sampleRate(r), bitCount(b), numChannels(c){}
+            Audio(int r = 44100, int b = 16, int c = 2): 
+                sampleRate(r),
+                bitCount(b),
+                numChannels(c){}
+            
+            //constructor to be used for testing purposes
+            Audio(int r, int b, int c, std::vector<std::pair<S, S>> d):
+                sampleRate(r),
+                bitCount(b),
+                numChannels(c),
+                data(d){}
+
+            //copy constructor
+            Audio(const Audio& other){
+               sampleRate = other.sampleRate;
+               bitCount = other.bitCount;
+               numChannels = other.numChannels;
+
+               //TODO: make this a deep copy
+               data = other.data;
+            }
+
+            //move constructor
+            Audio(Audio&& other){
+                sampleRate = other.sampleRate;
+                bitCount = other.bitCount;
+                numChannels = other.numChannels;
+
+                //TODO: make this a deep copy
+                data = std::move(other.data);
+
+                other.data.resize(0);
+            }
+
+            //destructor
+            ~Audio(){}
+
+            //copy assignment
+            Audio& operator=(const Audio& other){
+                sampleRate = other.sampleRate;
+                bitCount = other.bitCount;
+                numChannels = other.numChannels;
+
+               //copy over the data;
+               data = other.data;
+
+               return *this;
+            }
+
+            //move assignment
+            Audio& operator=(Audio&& other){
+                sampleRate = other.sampleRate;
+                bitCount = other.bitCount;
+                numChannels = other.numChannels;
+
+                //move over the data
+                data = std::move(other.data);
+
+                other.data.resize(0);
+
+                return *this;
+            }
+            
+            
             
             void read(std::string filename){
                 std::ifstream infile(filename, std::ios::in | std::ios::binary);
@@ -346,6 +409,11 @@ namespace ptlmuh006{
 
                 outfile.close();
             }
+            
+            int getSampleRate(){ return sampleRate; }
+            int getBitCount(){ return bitCount; }
+            int getNumChannels(){ return numChannels; }
+            std::vector<std::pair<S, S>> getData(){ return data; }
             
             //volume factor operator
             Audio operator*(const std::pair<float, float> factor) const{
