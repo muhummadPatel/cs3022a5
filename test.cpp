@@ -1,3 +1,14 @@
+/*
+ * All unit tests for the audio class is implemented here. Move/copy semantics
+ * have been tested for both the mono and stereo specialisations of the audio 
+ * class. All operator overloads and transformations have also been tested.
+ * I have used an "if", "then", "when" pattern to set out the unit tests. This 
+ * should make them easier to read and understand.
+ *
+ * Muhummad Patel PTLMUH006
+ * 14-May-2015
+ */
+
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
