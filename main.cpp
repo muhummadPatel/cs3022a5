@@ -70,6 +70,15 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         cat.save(outFilename);
         
         return 0;
+    }else if(std::string(argv[pos]) == "-v"){
+        if(argc < (pos+3)+1) return 1;
+        
+        Audio<T> aud(argv[pos+3], sampleRate, bitCount, noChannels);
+        std::pair<float, float> fact(std::stof(argv[pos+1]), std::stof(argv[pos+2]));
+        Audio<T> factored = aud * fact;
+        factored.save(outFilename);
+        
+        return 0;
     }else{
         return 1;
     }
