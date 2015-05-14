@@ -23,6 +23,7 @@
 #include <limits>
 #include <numeric>
 #include <string>
+#include <sstream>
 #include <vector>
 
 namespace ptlmuh006{
@@ -165,7 +166,9 @@ namespace ptlmuh006{
 
             //save the samples in this objects buffer to a .raw audio file
             void save(std::string filename){
-                std::ofstream outfile(filename, std::ios::out | std::ios::binary);
+                std::ostringstream fname;
+                fname << filename << "_" << sampleRate << "_" << (sizeof(S) * 8) << "_mono.raw";
+                std::ofstream outfile(fname.str(), std::ios::out | std::ios::binary);
                 outfile.write((char*)(&(data[0])), sizeof(S) * data.size());
                 outfile.close();
             }
@@ -435,7 +438,9 @@ namespace ptlmuh006{
 
             //Writes the data from the buffer to the file with the sepcified filename.
             void save(std::string filename){
-                std::ofstream outfile(filename, std::ios::out | std::ios::binary);
+                std::ostringstream fname;
+                fname << filename << "_" << sampleRate << "_" << (sizeof(S) * 8) << "_stereo.raw";
+                std::ofstream outfile(fname.str(), std::ios::out | std::ios::binary);
 
                 //write out each set of left and right samples one at a time
                 int index = 0;
