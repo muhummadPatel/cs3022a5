@@ -129,10 +129,8 @@ namespace ptlmuh006{
                 infile.seekg(0, infile.end);
                 int infileLength = infile.tellg();
                 infile.seekg(0, infile.beg);
-                std::cout << "length of " << filename << ": " << infileLength << std::endl;
 
                 int numSamples = infileLength / (sizeof(S) * numChannels);
-                std::cout << "numSamples: " << numSamples << std::endl;
 
                 data.resize(numSamples);
                 for(int i = 0; i < numSamples; i++){
@@ -140,11 +138,7 @@ namespace ptlmuh006{
                     infile.read(buff, sizeof(S));
                     data[i] = *(S *)(buff);
                 }
-
-//                for(int i = 0 ; i < 10; i++){
-//                    std::cout << data[numSamples - (i+1)] << std::endl;
-//                }
-
+                
                 infile.close();
             }
 
@@ -392,10 +386,8 @@ namespace ptlmuh006{
                 infile.seekg(0, infile.end);
                 int infileLength = infile.tellg();
                 infile.seekg(0, infile.beg);
-                std::cout << "length of " << filename << ": " << infileLength << std::endl;
 
                 int numSamples = infileLength / (sizeof(S) * numChannels);
-                std::cout << "numSamples: " << numSamples << std::endl;
 
                 data.resize(numSamples);
                 for(int i = 0; i < numSamples; i++){
