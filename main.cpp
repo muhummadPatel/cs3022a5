@@ -80,9 +80,7 @@ template <typename T> int parseOptions(int sampleRate, int bitCount, int noChann
         
         //open the 2 audio files being range added
         Audio<T> aud1(argv[pos+5], sampleRate, bitCount, noChannels);
-        std::cout << "s1: " << aud1.getData().size() << std::endl;
         Audio<T> aud2(argv[pos+6], sampleRate, bitCount, noChannels);
-        std::cout << "s2: " << aud2.getData().size() << std::endl;
         
         //construct the ranges over which they will be added
         int r1Start = (int)(std::stof(argv[pos+1]) * sampleRate);
